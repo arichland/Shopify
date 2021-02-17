@@ -29,6 +29,7 @@ orders = {}
 key_list = []
 dict1 = {}
 tax= {}
+
 def api_collections():
    url = get('smart_collections')
    r = requests.get(url)
@@ -97,10 +98,28 @@ def api_all_rrhome_products():
 
 
 def api_all_shopify_products():
-   url = get('products')
-   r = requests.get(url)
-   data = json.loads(r.text)
-   pp.pprint(data)
+    url1 = get('products')
+    url2 = get('products')+"page_info=%s&limit=50"
+    request = requests.get(url1)
+    data = request.json()
+    header = request.headers
+    nx_pg = header['Link'][-5:-1]
+    pg_link = header['Link'][1:-13]
+    count = 0
+
+    while nx_pg == 'next':
+        count += 1
+        print("\nProduct Page", count)
+        request2 = requests.get(url2, pg_link)
+        data2 = request2.json()
+        #data2 = json.loads(request2.text)
+        header2 = request2.headers
+        pg_link = header2['Link'][1:-13]
+        nx_pg = header2['Link'][-5:-1]
+        products = data2['products']
+        for i in products:
+            pp.pprint(i['handle'])
+api_all_shopify_products()
 
 
 def api_all_shopify_orders():
@@ -295,7 +314,7 @@ def api_all_shopify_orders():
     pp.pprint(orders)
 
     print('Shopify Orders API: Complete')
-api_all_shopify_orders()
+#api_all_shopify_orders()
 
 def get_all_shopify_customers():
    url = get('customers')
@@ -303,6 +322,7 @@ def get_all_shopify_customers():
    data = json.loads(r.text)
   #customer_data = data['customers']
   #pp.pprint(data)
+
 
    for i in data['customers']:
       customer_id = i['id']
@@ -313,6 +333,7 @@ def get_all_shopify_customers():
          address_line2 = i['address2']
          city = i['city']
          company = i['company']
+#get_all_shopify_customers()
 
 def sql_shopify_orders():
    print(     'Shopify Orders SQL: Start')
