@@ -18,7 +18,6 @@ database = sql('db_shopify')
 # Variables
 auth = pydict.auth.get
 get = pydict.base_urls.get
-count = 0
 format = "%Y-%m-%dT%H:%M:%S%z"
 dt = datetime.strptime
 
@@ -26,78 +25,18 @@ dt = datetime.strptime
 products = {}
 variants = {}
 orders = {}
+
 key_list = []
 dict1 = {}
-tax= {}
+tax = {}
 
 def api_collections():
    url = get('smart_collections')
    r = requests.get(url)
    data = json.loads(r.text)
    pp.pprint(data)
-#get_collections()
 
-def api_all_rrhome_products():
-   url = get('products')
-   params = {'product_type': 'weighted blanket'}
-   params2 = {'vendor': 'R&R Home'}
-   r = requests.get(url, params=params2)
-   data = json.loads(r.text)
-
-   for i in data['products']:
-      handle = i['handle']
-      status = i['status']
-      tags = i['tags']
-      title = i['title']
-      vendor = i['vendor']
-      created_at = i['created_at']
-      p_id = i['id']
-      variants = i['variants']
-
-      temp1 = {p_id: {
-         'handle': handle,
-         'status': status,
-         'tags': tags,
-         'title': title,
-         'vendor': vendor,
-         'created_at': created_at
-         }}
-      products.update(temp1)
-
-      for i in variants:
-         barcode = i['barcode']
-         grams = i['grams']
-         id = i['id']
-         inven_item_id = i['inventory_item_id']
-         inven_quantity = i['inventory_quantity']
-         price = i['price']
-         product_id = i['product_id']
-         sku = i['sku']
-         taxable = i['taxable']
-         title = i['title']
-         weight = i['weight']
-         weight_unit = i['weight_unit']
-
-         temp2 ={id: {
-            'id': id,
-            'barcode': barcode,
-            'parent_id': p_id,
-            'product_id': product_id,
-            'inven_item_id': inven_item_id,
-            'inven_quantity': inven_quantity,
-            'price': price,
-            'sku': sku,
-            'taxable': taxable,
-            'title': title,
-            'weight': weight,
-            'weight_unit': weight_unit
-         }}
-         pp.pprint(temp2)
-   #pp.pprint(data)
-#get_all_rrhome_products()
-
-
-def api_all_shopify_products():
+def api_all_products():
     url1 = get('products')
     url2 = get('products')+"page_info=%s&limit=50"
     request = requests.get(url1)
@@ -105,24 +44,49 @@ def api_all_shopify_products():
     header = request.headers
     nx_pg = header['Link'][-5:-1]
     pg_link = header['Link'][1:-13]
-    count = 0
+    prod_count = 0
+    pg_count = 0
 
     while nx_pg == 'next':
-        count += 1
-        print("\nProduct Page", count)
+        pg_count += 1
+        print("\nProduct Page", pg_count)
         request2 = requests.get(url2, pg_link)
         data2 = request2.json()
         #data2 = json.loads(request2.text)
         header2 = request2.headers
         pg_link = header2['Link'][1:-13]
         nx_pg = header2['Link'][-5:-1]
-        products = data2['products']
-        for i in products:
-            pp.pprint(i['handle'])
-api_all_shopify_products()
+        prods = data2['products']
+        #pp.pprint(prods)
+        for i in prods:
+            prod_count += 1
+            product_id = i['id']
+            handle = i['handle']
+            title = i['title']
+            vendor = i['vendor']
+            product_type = i['product_type']
+            published_at = i['published_at']
+            status = i['status']
+            updated_at = i['updated_at']
+            created_at = i['created_at']
+            tags = i['tags']
 
+            temp = {prod_count: {
+                'product_id': product_id,
+                'handle': handle,
+                'title': title,
+                'vendor': vendor,
+                'product_type': product_type,
+                'updated_at': updated_at,
+                'created_at': created_at,
+                'tags': tags,
+                'published_at': published_at,
+                'status': status
+            }}
+            products.update(temp)
+    pp.pprint(products)
 
-def api_all_shopify_orders():
+def api_all_orders():
     count = 0
     print('Shopify Orders API: Start')
     url = get('orders')
@@ -314,28 +278,210 @@ def api_all_shopify_orders():
     pp.pprint(orders)
 
     print('Shopify Orders API: Complete')
-#api_all_shopify_orders()
 
-def get_all_shopify_customers():
-   url = get('customers')
-   r = requests.get(url)
-   data = json.loads(r.text)
-  #customer_data = data['customers']
-  #pp.pprint(data)
+def api_all_customers():
+    customers = {}
+    url = get('customers')
+    r = requests.get(url)
+    data = json.loads(r.text)
+    #pp.pprint(data)
+    count = 0
 
+    for i in data['customers']:
+        count += 1
+        accepts_marketing = i['accepts_marketing']
+        accepts_marketing_updated_at = dt(i['accepts_marketing_updated_at'], format).isoformat()
+        customer_id = i['id']
+        created_at = dt(i['created_at'], format).isoformat()
+        email = i['email']
+        first_name = i['first_name']
+        last_name = i['last_name']
+        marketing_opt_in_level = i['marketing_opt_in_level']
+        multipass_identifier = i['multipass_identifier']
+        phone = i['phone']
+        tags = i['tags']
+        tax_exempt = i['tax_exempt']
+        updated_at = dt(i['updated_at'], format).isoformat()
+        verified_email = i['verified_email']
+        address1 = i['default_address']['address1']
+        address2 = i['default_address']['address2']
+        city = i['default_address']['city']
+        company = i['default_address']['company']
+        country = i['default_address']['country']
+        country_code = i['default_address']['country_code']
+        state = i['default_address']['province']
+        state_code = i['default_address']['province_code']
+        zip = i['default_address']['zip']
+        name = i['default_address']['name']
+        temp = {count: {
+            'accepts_marketing': accepts_marketing,
+            'accepts_marketing_updated_at': accepts_marketing_updated_at,
+            'address1': address1,
+            'address2': address2,
+            'city': city,
+            'company': company,
+            'country': country,
+            'country_code': country_code,
+            'created_at': created_at,
+            'customer_id': customer_id,
+            'email': email,
+            'first_name': first_name,
+            'last_name': last_name,
+            'marketing_opt_in_level': marketing_opt_in_level,
+            'multipass_identifier': multipass_identifier,
+            'name': name,
+            'phone': phone,
+            'state': state,
+            'state_code': state_code,
+            'tags': tags,
+            'tax_exempt': tax_exempt,
+            'updated_at': updated_at,
+            'verified_email': verified_email,
+            'zip': zip
+        }}
+        customers.update(temp)
+    pp.pprint(customers)
+    return customers
 
-   for i in data['customers']:
-      customer_id = i['id']
-      address1 = i['addresses']
-      accepts_marketing = i['accepts_marketing']
-      for i in address1:
-         address_line1 = i['address1']
-         address_line2 = i['address2']
-         city = i['city']
-         company = i['company']
-#get_all_shopify_customers()
+def sql_customers():
+    print('Shopify Products SQL: Start')
+    con = pymysql.connect(
+        user=user,
+        password=password,
+        host=host,
+        database=database
+    )
+    customers = api_all_customers()
+    for i in customers.values():
+            accepts_marketing = i['accepts_marketing']
+            accepts_marketing_updated_at = i['accepts_marketing_updated_at']
+            customer_id = i['customer_id']
+            created_at = i['created_at']
+            email = i['email']
+            first_name = i['first_name']
+            last_name = i['last_name']
+            marketing_opt_in_level = i['marketing_opt_in_level']
+            multipass_identifier = i['multipass_identifier']
+            phone = i['phone']
+            tags = i['tags']
+            tax_exempt = i['tax_exempt']
+            updated_at = i['updated_at']
+            verified_email = i['verified_email']
+            address1 = i['address1']
+            address2 = i['address2']
+            city = i['city']
+            company = i['company']
+            country = i['country']
+            country_code = i['country_code']
+            state = i['state']
+            state_code = i['state_code']
+            zip = i['zip']
+            name = i['name']
 
-def sql_shopify_orders():
+            qry_insert_customers = """Insert into shopify.tbl_customers(
+                accepts_marketing,
+                accepts_marketing_updated_at,
+                address1, 
+                address2, 
+                city, 
+                company, 
+                country, 
+                country_code, 
+                created_at, 
+                customer_id, 
+                email, 
+                first_name, 
+                last_name, 
+                marketing_opt_in_level, 
+                multipass_identifier, 
+                name,
+                phone, 
+                state, 
+                state_code, 
+                tags, 
+                tax_exempt, 
+                updated_at, 
+                verified_email, 
+                zip 
+                ) 
+                VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+
+            with con.cursor() as cur:
+                cur.execute(qry_insert_customers, (
+                    accepts_marketing,
+                    accepts_marketing_updated_at,
+                    address1,
+                    address2,
+                    city,
+                    company,
+                    country,
+                    country_code,
+                    created_at,
+                    customer_id,
+                    email,
+                    first_name,
+                    last_name,
+                    marketing_opt_in_level,
+                    multipass_identifier,
+                    name,
+                    phone,
+                    state,
+                    state_code,
+                    tags,
+                    tax_exempt,
+                    updated_at,
+                    verified_email,
+                    zip
+                ))
+                con.commit()
+
+def sql_products():
+   print(     'Shopify Products SQL: Start')
+   con = pymysql.connect(
+      user=user,
+      password=password,
+      host=host,
+      database=database
+      )
+   for i in products.values():
+       created_at = dt(i['created_at'], format).isoformat()
+       handle = i['handle']
+       product_id = i['product_id']
+       product_type = i['product_type']
+       status = i['status']
+       tags = i['tags']
+       title = i['title']
+       updated_at = dt(i['updated_at'], format).isoformat()
+       vendor = i['vendor']
+
+       qry_insert_products = """Insert into shopify.tbl_products(
+                       created_at,
+                       handle,
+                       product_id,
+                       product_type,
+                       status,
+                       tags,
+                       title,
+                       updated_at,
+                       vendor) 
+                       VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+
+       with con.cursor() as cur:
+           cur.execute(qry_insert_products, (
+               created_at,
+               handle,
+               product_id,
+               product_type,
+               status,
+               tags,
+               title,
+               updated_at,
+               vendor
+           ))
+       con.commit()
+   print('Shopify Products SQL: Complete')
+
+def sql_orders():
    print(     'Shopify Orders SQL: Start')
    con = pymysql.connect(
       user=user,
@@ -541,4 +687,13 @@ def sql_shopify_orders():
 
       con.commit()
    print(     'Shopify Orders SQL: Complete')
-#sql_shopify_orders()
+
+def functions():
+    #api_collections()
+    #api_all_products()
+    #api_all_orders()
+    api_all_customers()
+    sql_customers()
+    #sql_products()
+    #sql_orders()
+functions()

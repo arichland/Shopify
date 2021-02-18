@@ -20,7 +20,7 @@ con = pymysql.connect(user=user,
                       charset=charset,
                       cursorclass=cusrorType)
 
-def create_tbl_shopify_orders():
+def create_tbl_orders():
     with con.cursor() as cur:
         qry_create_table = """CREATE TABLE IF NOT EXISTS tbl_orders(
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -106,7 +106,62 @@ def create_tbl_shopify_orders():
         cur.execute(qry_create_table)
     con.commit()
 
-def create_tables():
-    create_tbl_shopify_orders()
+def create_tbl_products():
+    with con.cursor() as cur:
+        qry_create_table = """
+        CREATE TABLE IF NOT EXISTS tbl_products(
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            created_at DATETIME,
+            handle TEXT,
+            product_id BIGINT,
+            product_type VARCHAR(25),
+            published_at DATETIME,
+            status VARCHAR(12),
+            tags TEXT,
+            title TEXT,
+            updated_at DATETIME,
+            vendor TEXT
+            )
+            ENGINE=INNODB;"""
+        cur.execute(qry_create_table)
+    con.commit()
 
+def create_tbl_customers():
+    with con.cursor() as cur:
+        qry_create_table = """
+        CREATE TABLE IF NOT EXISTS tbl_customers(
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            accepts_marketing VARCHAR(10),
+            accepts_marketing_updated_at DATETIME,
+            address1 TEXT,
+            address2 TEXT,
+            city TEXT,
+            company TEXT,
+            country TEXT,
+            country_code VARCHAR(5),
+            created_at DATETIME,
+            customer_id BIGINT,
+            email TEXT,
+            first_name TEXT,
+            last_name TEXT,
+            marketing_opt_in_level VARCHAR(10),
+            multipass_identifier VARCHAR(10),
+            name TEXT,
+            phone TEXT,
+            state TEXT,
+            state_code VARCHAR(5),
+            tags TEXT,
+            tax_exempt VARCHAR(10),
+            updated_at DATETIME,
+            verified_email VARCHAR(10),
+            zip VARCHAR(12)
+            )
+            ENGINE=INNODB;"""
+        cur.execute(qry_create_table)
+    con.commit()
+
+def create_tables():
+    create_tbl_orders()
+    create_tbl_products()
+    create_tbl_customers()
 create_tables()
