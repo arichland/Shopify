@@ -1,4 +1,4 @@
-_author_ = 'arichland'
+_author_ = 'TEST'
 import pydict
 import requests
 import json
