@@ -13,14 +13,9 @@ charset = sql('charset')
 cusrorType = pymysql.cursors.DictCursor
 
 # Establish connection to SQL DB
-con = pymysql.connect(user=user,
-                      password=password,
-                      host=host,
-                      database=db,
-                      charset=charset,
-                      cursorclass=cusrorType)
 
 def create_tbl_orders():
+    con = pymysql.connect(user=user, password=password, host=host, database=db, charset=charset, cursorclass=cusrorType)
     with con.cursor() as cur:
         qry_create_table = """CREATE TABLE IF NOT EXISTS tbl_orders(
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -105,8 +100,11 @@ def create_tbl_orders():
             ENGINE=INNODB;"""
         cur.execute(qry_create_table)
     con.commit()
+    cur.close()
+    con.close()
 
 def create_tbl_products():
+    con = pymysql.connect(user=user, password=password, host=host, database=db, charset=charset, cursorclass=cusrorType)
     with con.cursor() as cur:
         qry_create_table = """
         CREATE TABLE IF NOT EXISTS tbl_products(
@@ -125,8 +123,11 @@ def create_tbl_products():
             ENGINE=INNODB;"""
         cur.execute(qry_create_table)
     con.commit()
+    cur.close()
+    con.close()
 
 def create_tbl_customers():
+    con = pymysql.connect(user=user, password=password, host=host, database=db, charset=charset, cursorclass=cusrorType)
     with con.cursor() as cur:
         qry_create_table = """
         CREATE TABLE IF NOT EXISTS tbl_customers(
@@ -159,6 +160,8 @@ def create_tbl_customers():
             ENGINE=INNODB;"""
         cur.execute(qry_create_table)
     con.commit()
+    cur.close()
+    con.close()
 
 def create_tables():
     create_tbl_orders()
