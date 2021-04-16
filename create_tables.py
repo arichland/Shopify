@@ -17,7 +17,7 @@ cusrorType = pymysql.cursors.DictCursor
 def create_tbl_orders():
     con = pymysql.connect(user=user, password=password, host=host, database=db, charset=charset, cursorclass=cusrorType)
     with con.cursor() as cur:
-        qry_create_table = """CREATE TABLE IF NOT EXISTS tbl_orders(
+        qry_create_table = """CREATE TABLE IF NOT EXISTS tbl_shopify_orders(
             id INT AUTO_INCREMENT PRIMARY KEY,
             browser_ip TEXT,
             buyer_accepts_marketing VARCHAR(25),
@@ -107,15 +107,29 @@ def create_tbl_products():
     con = pymysql.connect(user=user, password=password, host=host, database=db, charset=charset, cursorclass=cusrorType)
     with con.cursor() as cur:
         qry_create_table = """
-        CREATE TABLE IF NOT EXISTS tbl_products(
+        CREATE TABLE IF NOT EXISTS tbl_shopify_products(
             id INT AUTO_INCREMENT PRIMARY KEY,
-            created_at DATETIME,
+            created_at DATETIME,            
             handle TEXT,
             product_id BIGINT,
             product_type VARCHAR(25),
             published_at DATETIME,
+            published_scope TEXT,
+            seo_title_tag TEXT,
+            seo_description_tag TEXT,
+            seo_product_type INT,
+            seo_gender TEXT,
+            seo_age_group TEXT,
+            seo_condition TEXT,
+            seo_custom_label_0 TEXT,
+            seo_custom_label_1 TEXT,
+            seo_custom_label_2 TEXT,
+            seo_custom_label_3 TEXT,
+            seo_custom_label_4 TEXT,
+            seo_cstmfy_req TEXT,            
             status VARCHAR(12),
             tags TEXT,
+            template_suffix TEXT,
             title TEXT,
             updated_at DATETIME,
             vendor TEXT
@@ -126,11 +140,46 @@ def create_tbl_products():
     cur.close()
     con.close()
 
+def create_tbl_variants():
+    con = pymysql.connect(user=user, password=password, host=host, database=db, charset=charset, cursorclass=cusrorType)
+    with con.cursor() as cur:
+        qry_create_table = """
+        CREATE TABLE IF NOT EXISTS tbl_shopify_variants(
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            barcode BIGINT,
+            created_at DATETIME,
+            fulfillment_service TEXT,
+            grams INT,            
+            inventory_item_id BIGINT,
+            inventory_management TEXT,
+            inventory_policy TEXT,
+            inventory_quantity INT,
+            old_inventory_quantity INT,
+            option1 TEXT,
+            option2 TEXT,
+            option3 TEXT,
+            position INT,
+            price DOUBLE,
+            product_id BIGINT,
+            requires_shipping TEXT,
+            sku TEXT,
+            taxable TEXT,
+            title TEXT,
+            updated_at DATETIME,
+            variant_id BIGINT,
+            weight DOUBLE,
+            weight_unit TEXT)
+            ENGINE=INNODB;"""
+        cur.execute(qry_create_table)
+    con.commit()
+    cur.close()
+    con.close()
+
 def create_tbl_customers():
     con = pymysql.connect(user=user, password=password, host=host, database=db, charset=charset, cursorclass=cusrorType)
     with con.cursor() as cur:
         qry_create_table = """
-        CREATE TABLE IF NOT EXISTS tbl_customers(
+        CREATE TABLE IF NOT EXISTS tbl_shopify_customers(
             id INT AUTO_INCREMENT PRIMARY KEY,
             accepts_marketing VARCHAR(10),
             accepts_marketing_updated_at DATETIME,
@@ -166,5 +215,6 @@ def create_tbl_customers():
 def create_tables():
     create_tbl_orders()
     create_tbl_products()
+    create_tbl_variants()
     create_tbl_customers()
 create_tables()

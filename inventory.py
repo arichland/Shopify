@@ -5,6 +5,7 @@ import json
 import pprint
 from datetime import datetime, timedelta, timezone, date
 import pymysql
+import math
 pp = pprint.PrettyPrinter(indent=1)
 
 # Variables
@@ -312,12 +313,12 @@ def select_sql_function(data, type):
     else:
         print("Error selecting SQL function")
 
-
-def call_shopify_api(url, type):
+def call_shopify_api(method, url, endpoint):
+    print("API Call")
     api_data = {}
-    req = requests.get(url)
+    req = requests(method, url)
     data = req.json()
-    select_sql_function(data, type)
+    select_sql_function(data, endpoint)
     header = req.headers
     link = header.get('Link', '')
     spl = str.split(link, ";")
@@ -348,8 +349,7 @@ def call_shopify_api(url, type):
         pg_link = lnk[indx1:indx2]
         nx_pg = lnk[indx3+5:-1]
         data = req.json()
-        pp.pprint(data)
-        #select_sql_function(data, type)
+        select_sql_function(data, endpoint)
 
 def get_products():
     print("Shopify Products: Start")
@@ -360,7 +360,7 @@ def get_products():
     data = call_shopify_api(base_url)
 #get_products()
 
-def get_all_product_variants():
+def get_all_inventory_levels():
     print("Shopify Products Variants: Start")
     def product_list():
         # SQL Connection Setup
@@ -378,6 +378,7 @@ def get_all_product_variants():
             prod = rows[0]
             for row in rows:
                 prods.append(row[0])
+
         return prods
 
     base_url = get("variants")
@@ -386,18 +387,49 @@ def get_all_product_variants():
         url = base_url %(i)
         call_shopify_api(url, "variants")
 
-def get_product_variants():
-    print("Shopify Products Variants: Start")
 
-    base_url = get("variants")
-    url = base_url % (6013805101211)
-    call_shopify_api(url, "variants")
+def get_inventory_item():
+    def inventory_list():
+        # SQL Connection Setup
+        sql = pydict.sql_dict.get
+        user = sql('user')
+        password = sql('password')
+        host = sql('host')
+        database = sql('db_shopify')
+        inventory = []
+        con = pymysql.connect(user=user, password=password, host=host, database=database)
+        with con.cursor() as cur:
+            qry_products = """SELECT inventory_item_id FROM tbl_shopify_variants WHERE inventory_management = "shopify";"""
+            cur.execute(qry_products)
+            rows = cur.fetchall()
+            prod = rows[0]
+            for row in rows:
+                inventory.append(row[0])
+        return inventory
 
-def get_product_metafields(product_id):
-    print("Shopify Products Metafields: Start")
-    base_url = get('metafields')
-    url = base_url %(product_id)
-    data = call_shopify_api(url, "variants")
-    for i in data.values():
-        for x in i:
-            pp.pprint(x['value'])
+    items = inventory_list()
+    call = 0
+    item_range = range(len(items))
+    item_len = len(items)
+
+    limit = 100
+    for i in range(math.ceil(len(items)/100)):
+        call += 1
+        #min = items[0:limit]
+        max = item_len - call * limit
+
+        print(max)
+
+        #print(call,item_range, item_range[i])
+
+
+    params = {}
+
+
+    base_url = get("inventory_items")
+    #url = base_url % (39551326322843)
+   #call_shopify_api("get", url, "inventory_items")
+
+get_inventory_item()
+
+
